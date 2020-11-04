@@ -1,0 +1,22 @@
+Parameters: 
+  VPCName:
+    Description: the name of VPC
+    Type: String
+    Default: FrankfurtVPC
+
+Resources: 
+  FrankfurtVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 192.168.0.0/16
+      EnableDnsSupport: 'true'
+      EnableDnsHostnames: 'true'
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value:
+            Ref: VPCName
+        - Key: Department
+          Value: DevTest
+        - Key: Project
+          Value: T&C 
