@@ -1,14 +1,48 @@
+# Network definition for demo zone. 
+# This typical network has two public and two private subnets across two AZs.
+
 Parameters: 
   VPCName:
     Description: the name of VPC
     Type: String
     Default: FrankfurtVPC
+  VPCCidrBlock:
+    Description: ip address space for VPC
+    Type: String
+    Default: 192.168.0.0/16
+  AZ1Name:
+    Description: the name of the first availability zone 
+    Type: String 
+    Default: eu-central-1a
+  AZ2Name:
+    Description: the name of the second availability zone 
+    Type: String 
+    Default: eu-central-1b
+  PublicSubnet01CidrBlock:
+    Description: ip address range for the first public subnet 
+    Type: String 
+    Default: 192.168.1.0/24
+  PrivateSubnet01CidrBlock:
+    Description: ip address range for the first private subnet 
+    Type: String 
+    Default: 192.168.2.0/24
+  PublicSubnet02CidrBlock:
+    Description: ip address range for the second public subnet 
+    Type: String 
+    Default: 192.168.3.0/24
+  PrivateSubnet02CidrBlock:
+    Description: ip address range for the second private subnet 
+    Type: String 
+    Default: 192.168.4.0/24
+  
 
 Resources: 
-  FrankfurtVPC:
+  # VPC definition 
+  entVPC:
     Type: AWS::EC2::VPC
     Properties:
-      CidrBlock: 192.168.0.0/16
+      CidrBlock:
+        Ref: VPCCidrBlock
       EnableDnsSupport: 'true'
       EnableDnsHostnames: 'true'
       InstanceTenancy: default
@@ -20,3 +54,282 @@ Resources:
           Value: DevTest
         - Key: Project
           Value: T&C 
+
+  # Subnets definition         
+  entPublicSubnet01:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: entVPC
+      CidrBlock:
+        Ref: PublicSubnet01CidrBlock
+      AvailabilityZone:
+        Ref: AZ1Name
+      Tags:
+        - Key: Name
+          Value: PubSub01
+        - Key: Department
+          Value: DevTest
+        - Key: Project
+          Value: T&C
+      MapPublicIpOnLaunch: 'true'
+          
+  entPrivateSubnet01:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: entVPC
+      CidrBlock:
+        Ref: PrivateSubnet01CidrBlock
+      AvailabilityZone:
+        Ref: AZ1Name
+      Tags:
+        - Key: Name
+          Value: PrvSub01
+        - Key: Department
+          Value: DevTest
+        - Key: Project
+          Value: T&C 
+
+  entPublicSubnet02:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: entVPC
+      CidrBlock:
+        Ref: PublicSubnet02CidrBlock
+      AvailabilityZone:
+        Ref: AZ2Name
+      Tags:
+        - Key: Name
+          Value: PubSub02
+        - Key: Department
+          Value: DevTest
+        - Key: Project
+          Value: T&C 
+      MapPublicIpOnLaunch: 'true'
+
+  entPrivateSubnet02:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: entVPC
+      CidrBlock:
+        Ref: PrivateSubnet02CidrBlock
+      AvailabilityZone:
+        Ref: AZ2Name
+      Tags:
+        - Key: Name
+          Value: PrvSub02
+        - Key: Department
+          Value: DevTest
+        - Key: Project
+          Value: T&C 
+
+  # Create Internet Gateway 
+  entInternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: entIGW
+        - Key: Department
+          Value: DevTest
+        - Key: Project
+          Value: T&C 
+
+  # Attach Internet Gateway to VPC
+  entAttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId:
+        Ref: entVPC
+      InternetGatewayId:
+        Ref: entInternetGateway
+
+  # Create Elastic IPs for NAT Gateways 
+  pub01EIP:
+    DependsOn: entAttachGateway
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+      Tags:
+        - Key: Name
+          Value: pub01EIP
+        - Key: Department
+          Value: DevTest
+        - Key: Project
+          Value: T&C 
+
+  pub02EIP:
+    DependsOn: entAttachGateway
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+      Tags:
+        - Key: Name
+          Value: pub02EIP
+        - Key: Department
+          Value: DevTest
+        - Key: Project
+          Value: T&C 
+
+  # Create NAT Gateways in public subnets 
+  pub01NAT:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+        - pub01EIP
+        - AllocationId
+      SubnetId:
+        Ref: entPublicSubnet01
+      Tags:
+        - Key: Name
+          Value: pub01NAT
+        - Key: Department
+          Value: DevTest
+        - Key: Project
+          Value: T&C 
+
+  pub02NAT:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+        - pub02EIP
+        - AllocationId
+      SubnetId:
+        Ref: entPublicSubnet02
+      Tags:
+        - Key: Name
+          Value: pub02NAT
+        - Key: Department
+          Value: DevTest
+        - Key: Project
+          Value: T&C 
+
+  # Create route tables for public subnets 
+  pubRT01:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:  
+        Ref: entVPC
+      Tags:
+      - Key: Name
+        Value: pubRT01
+      - Key: Department
+        Value: DevTest
+      - Key: Project
+        Value: T&C 
+
+  pubRT02:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:  
+        Ref: entVPC
+      Tags:
+      - Key: Name
+        Value: pubRT02
+      - Key: Department
+        Value: DevTest
+      - Key: Project
+        Value: T&C 
+
+  # Add default routes to IGW
+  pub01DefaultRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        Ref: pubRT01
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: entInternetGateway
+
+  pub02DefaultRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        Ref: pubRT02
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: entInternetGateway
+
+  # Create route tables for private subnets       
+  prvRT01:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:  
+        Ref: entVPC
+      Tags:
+      - Key: Name
+        Value: prvRT01
+      - Key: Department
+        Value: DevTest
+      - Key: Project
+        Value: T&C 
+
+  prvRT02:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:  
+        Ref: entVPC
+      Tags:
+      - Key: Name
+        Value: prvRT02
+      - Key: Department
+        Value: DevTest
+      - Key: Project
+        Value: T&C 
+
+  # Add default routes to NAT Gateways
+  prv01DefaultRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        Ref: prvRT01
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: pub01NAT
+
+  prv02DefaultRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        Ref: prvRT02
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: pub02NAT
+
+  # Associate route tables with subnets 
+  pubSub01RTAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: entPublicSubnet01
+      RouteTableId:
+        Ref: pubRT01
+
+  prvSub01RTAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: entPrivateSubnet01
+      RouteTableId:
+        Ref: prvRT01
+
+  pubSub02RTAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: entPublicSubnet02
+      RouteTableId:
+        Ref: pubRT02
+
+  prvSub02RTAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: entPrivateSubnet02
+      RouteTableId:
+        Ref: prvRT02
