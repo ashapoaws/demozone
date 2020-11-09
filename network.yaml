@@ -333,3 +333,26 @@ Resources:
         Ref: entPrivateSubnet02
       RouteTableId:
         Ref: prvRT02
+
+
+Outputs:
+  stackPublicSubnet01:
+    Description: The ID of the entPublicSubnet01
+    Value: !Ref entPublicSubnet01
+    Export:
+      Name: !Sub "${AWS::StackName}-entPublicSubnet01ID"
+  stackPrivateSubnet01:
+    Description: The ID of the entPrivateSubnet01
+    Value: !Ref entPrivateSubnet01
+    Export:
+      Name: !Sub "${AWS::StackName}-entPrivateSubnet01ID"
+  stackPublicSubnet02:
+    Description: The ID of the entPublicSubnet02
+    Value: !Ref entPublicSubnet02
+    Export:
+      Name: !Sub "${AWS::StackName}-entPublicSubnet02ID"
+  stackPrivateSubnet02:
+    Description: The ID of the entPrivateSubnet02
+    Value: !Ref entPrivateSubnet02
+    Export:
+      Name: !Sub "${AWS::StackName}-entPrivateSubnet02ID"
