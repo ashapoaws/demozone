@@ -34,6 +34,14 @@ Parameters:
     Description: ip address range for the second private subnet 
     Type: String 
     Default: 192.168.4.0/24
+  DepartmentName:
+    Description: the value of Department tag
+    Type: String
+    Default: DevTest
+  ProjectName:
+    Description: the value of Project tag
+    Type: String
+    Default: TC
   
 
 Resources: 
@@ -51,9 +59,11 @@ Resources:
           Value:
             Ref: VPCName
         - Key: Department
-          Value: DevTest
+          Value: 
+            Ref: DepartmentName
         - Key: Project
-          Value: T&C 
+          Value:
+            Ref: ProjectName 
 
   # Subnets definition         
   entPublicSubnet01:
@@ -69,9 +79,11 @@ Resources:
         - Key: Name
           Value: PubSub01
         - Key: Department
-          Value: DevTest
+          Value: 
+            Ref: DepartmentName
         - Key: Project
-          Value: T&C
+          Value:
+            Ref: ProjectName
       MapPublicIpOnLaunch: 'true'
           
   entPrivateSubnet01:
@@ -87,9 +99,11 @@ Resources:
         - Key: Name
           Value: PrvSub01
         - Key: Department
-          Value: DevTest
+          Value: 
+            Ref: DepartmentName
         - Key: Project
-          Value: T&C 
+          Value:
+            Ref: ProjectName
 
   entPublicSubnet02:
     Type: AWS::EC2::Subnet
@@ -104,9 +118,11 @@ Resources:
         - Key: Name
           Value: PubSub02
         - Key: Department
-          Value: DevTest
+          Value: 
+            Ref: DepartmentName
         - Key: Project
-          Value: T&C 
+          Value:
+            Ref: ProjectName
       MapPublicIpOnLaunch: 'true'
 
   entPrivateSubnet02:
@@ -122,9 +138,11 @@ Resources:
         - Key: Name
           Value: PrvSub02
         - Key: Department
-          Value: DevTest
+          Value: 
+            Ref: DepartmentName
         - Key: Project
-          Value: T&C 
+          Value:
+            Ref: ProjectName
 
   # Create Internet Gateway 
   entInternetGateway:
@@ -134,9 +152,11 @@ Resources:
         - Key: Name
           Value: entIGW
         - Key: Department
-          Value: DevTest
+          Value: 
+            Ref: DepartmentName
         - Key: Project
-          Value: T&C 
+          Value:
+            Ref: ProjectName
 
   # Attach Internet Gateway to VPC
   entAttachGateway:
@@ -157,9 +177,11 @@ Resources:
         - Key: Name
           Value: pub01EIP
         - Key: Department
-          Value: DevTest
+          Value: 
+            Ref: DepartmentName
         - Key: Project
-          Value: T&C 
+          Value:
+            Ref: ProjectName
 
   pub02EIP:
     DependsOn: entAttachGateway
@@ -170,9 +192,11 @@ Resources:
         - Key: Name
           Value: pub02EIP
         - Key: Department
-          Value: DevTest
+          Value: 
+            Ref: DepartmentName
         - Key: Project
-          Value: T&C 
+          Value:
+            Ref: ProjectName
 
   # Create NAT Gateways in public subnets 
   pub01NAT:
@@ -188,9 +212,11 @@ Resources:
         - Key: Name
           Value: pub01NAT
         - Key: Department
-          Value: DevTest
+          Value: 
+            Ref: DepartmentName
         - Key: Project
-          Value: T&C 
+          Value:
+            Ref: ProjectName
 
   pub02NAT:
     Type: AWS::EC2::NatGateway
@@ -205,9 +231,11 @@ Resources:
         - Key: Name
           Value: pub02NAT
         - Key: Department
-          Value: DevTest
+          Value: 
+            Ref: DepartmentName
         - Key: Project
-          Value: T&C 
+          Value:
+            Ref: ProjectName
 
   # Create route tables for public subnets 
   pubRT01:
@@ -219,9 +247,11 @@ Resources:
       - Key: Name
         Value: pubRT01
       - Key: Department
-        Value: DevTest
+        Value: 
+          Ref: DepartmentName
       - Key: Project
-        Value: T&C 
+        Value:
+          Ref: ProjectName 
 
   pubRT02:
     Type: AWS::EC2::RouteTable
@@ -232,9 +262,11 @@ Resources:
       - Key: Name
         Value: pubRT02
       - Key: Department
-        Value: DevTest
+        Value: 
+          Ref: DepartmentName
       - Key: Project
-        Value: T&C 
+        Value:
+          Ref: ProjectName 
 
   # Add default routes to IGW
   pub01DefaultRoute:
@@ -265,9 +297,11 @@ Resources:
       - Key: Name
         Value: prvRT01
       - Key: Department
-        Value: DevTest
+        Value: 
+          Ref: DepartmentName
       - Key: Project
-        Value: T&C 
+        Value:
+          Ref: ProjectName
 
   prvRT02:
     Type: AWS::EC2::RouteTable
@@ -278,9 +312,11 @@ Resources:
       - Key: Name
         Value: prvRT02
       - Key: Department
-        Value: DevTest
+        Value: 
+          Ref: DepartmentName
       - Key: Project
-        Value: T&C 
+        Value:
+          Ref: ProjectName
 
   # Add default routes to NAT Gateways
   prv01DefaultRoute:
